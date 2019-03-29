@@ -1,4 +1,3 @@
-@(Readme)
 # HGRAINBOW
 #### Supplementary data and scripts used in the article "Haplotype-based genome wide association study using a novel SNP-set method : RAINBOW"
 #### Author : Kosuke Hamazaki (hamazaki@ut-biomet.org)
