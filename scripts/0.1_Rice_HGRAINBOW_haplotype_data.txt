@@ -1,0 +1,69 @@
+#####################################################################################
+###### 0.1_Rice_HGRAINBOW_generate_haplotype_data_and_estimate_haplotype_block ######
+#####################################################################################
+
+
+#### Settings
+### change directry
+cd /media/hamazaki/d4000953-5e56-40ce-97ea-4cfee57fc91a/research/rice/Project/HGRAINBOW
+
+
+### At first, pass PATH
+source ~/.bash_profile
+
+
+#### Extract haplotype and genotype data
+### Cut MAF & MS_rate
+plink --bfile raw_data/genotype/base_filtered_v0.7_0.8_10kb_1_0.8_50_1 --make-bed --out raw_data/genotype/L3024_MS_0.05_MAF_0.025 --geno 0.05 --maf 0.025
+
+
+### bed, bim, fam -> vcf
+plink --bfile raw_data/genotype/L3024_MS_0.05_MAF_0.025 --recode vcf-iid --out raw_data/genotype/L3024_MS_0.05_MAF_0.025_vcf
+
+
+### compress vcf files
+bgzip raw_data/genotype/L3024_MS_0.05_MAF_0.025_vcf.vcf
+tabix raw_data/genotype/L3024_MS_0.05_MAF_0.025_vcf.vcf.gz
+
+
+### vcfでlistの分系統を抜き出しMAFで切る
+vcftools --gzvcf raw_data/genotype/L3024_MS_0.05_MAF_0.025_vcf.vcf.gz --recode --keep raw_data/extra/ind1A_ind1B_name_list.txt --stdout --maf 0.025 --out raw_data/genotype/ind1A_ind1B_raw |bgzip -c > raw_data/genotype/ind1A_ind1B_raw.vcf.gz
+
+### beagleでimputation
+java -jar /home/hamazaki/program/beagle.03Jul18.40b.jar gt=raw_data/genotype/ind1A_ind1B_raw.vcf.gz nthreads=12 out=raw_data/genotype/ind1A_ind1B_MS_0.05_MAF_0.025_imputed
+
+
+### もう一回MAFで切る
+vcftools --gzvcf raw_data/genotype/ind1A_ind1B_MS_0.05_MAF_0.025_imputed.vcf.gz --recode --stdout --maf 0.025 --out raw_data/genotype/ind1A_ind1B_MAF_0.025 |bgzip -c > raw_data/genotype/ind1A_ind1B_MAF_0.025.vcf.gz
+
+
+### biallelicに直し、indelsを除く
+vcftools --gzvcf raw_data/genotype/ind1A_ind1B_MAF_0.025.vcf.gz --recode --remove-indels  --min-alleles 2 --max-alleles 2 --stdout --out raw_data/genotype/ind1A_ind1B_MAF_0.025_SNP |bgzip -c > raw_data/genotype/ind1A_ind1B_MAF_0.025_SNP.vcf.gz
+
+
+### GTの抽出
+## GT dataの抽出
+vcftools --gzvcf raw_data/genotype/ind1A_ind1B_MAF_0.025_SNP.vcf.gz --extract-FORMAT-info GT --out raw_data/genotype/ind1A_ind1B_MAF_0.025
+
+
+### extract haplotype data
+## haplotyope1
+grep -v "2|" | grep -v "|2" raw_data/genotype/ind1A_ind1B_MAF_0.025.GT.FORMAT | sed "s/1|1/1/g"  | sed "s/0|1/0/g" | sed "s/1|0/1/g" | sed "s/0|0/0/g"  > data/genotype/L3024_core_extract_L414_ind1A_ind1B_MAF_0.025_haplo1.tsv
+
+## haplotyope2
+grep -v "2|" | grep -v "|2" raw_data/genotype/ind1A_ind1B_MAF_0.025.GT.FORMAT | sed "s/1|1/1/g"  | sed "s/0|1/1/g" | sed "s/1|0/0/g" | sed "s/0|0/0/g"  > data/genotype/L3024_core_extract_L414_ind1A_ind1B_MAF_0.025_haplo2.tsv
+
+## genotype
+grep -v "2|" | grep -v "|2" raw_data/genotype/ind1A_ind1B_MAF_0.025.GT.FORMAT | sed "s/1|1/1/g"  | sed "s/0|1/0/g" | sed "s/1|0/0/g" | sed "s/0|0/-1/g"  > data/genotype/L3024_core_extract_L414_ind1A_ind1B_MAF_0.025_geno.tsv
+
+
+#### Estimate haplotype block
+### vcf --> ped
+vcftools --gzvcf raw_data/genotype/ind1A_ind1B_MAF_0.025_SNP.vcf.gz --plink --out raw_data/genotype/ind1A_ind1B_MAF_0.025_SNP
+
+### ped --> bed 
+plink --ped raw_data/genotype/ind1A_ind1B_MAF_0.025_SNP.ped --map raw_data/genotype/ind1A_ind1B_MAF_0.025_SNP.map --make-bed --out raw_data/genotype/ind1A_ind1B_MAF_0.025_SNP
+
+
+### estimate haplotype block (min-maf)
+plink --bfile raw_data/genotype/ind1A_ind1B_MAF_0.025_SNP --blocks no-pheno-req --out raw_data/genotype/ind1A_ind1B_haplotype_block_min_maf_0.025_list
