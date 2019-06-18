@@ -1,5 +1,5 @@
 # HGRAINBOW
-#### Supplementary data and scripts used in the article "Haplotype-based genome wide association study using a novel SNP-set method : RAINBOW"
+#### Supplementary data and scripts used in the article ["Haplotype-based genome wide association study using a novel SNP-set method : RAINBOW"](https://www.biorxiv.org/content/10.1101/612028v1)
 #### Author : Kosuke Hamazaki (hamazaki@ut-biomet.org)
 #### Date : 2019/03/28
 Here, I explain the structure of this repository.
