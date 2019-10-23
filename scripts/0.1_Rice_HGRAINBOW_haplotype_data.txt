@@ -26,23 +26,23 @@ bgzip raw_data/genotype/L3024_MS_0.05_MAF_0.025_vcf.vcf
 tabix raw_data/genotype/L3024_MS_0.05_MAF_0.025_vcf.vcf.gz
 
 
-### vcfでlistの分系統を抜き出しMAFで切る
+### extract accessions in the list from the vcf file, and then remove SNPs with MAF <= 0.025
 vcftools --gzvcf raw_data/genotype/L3024_MS_0.05_MAF_0.025_vcf.vcf.gz --recode --keep raw_data/extra/ind1A_ind1B_name_list.txt --stdout --maf 0.025 --out raw_data/genotype/ind1A_ind1B_raw |bgzip -c > raw_data/genotype/ind1A_ind1B_raw.vcf.gz
 
-### beagleでimputation
+### perform imputation via Beagle 5.0
 java -jar /home/hamazaki/program/beagle.03Jul18.40b.jar gt=raw_data/genotype/ind1A_ind1B_raw.vcf.gz nthreads=12 out=raw_data/genotype/ind1A_ind1B_MS_0.05_MAF_0.025_imputed
 
 
-### もう一回MAFで切る
+### Remove SNPs with MAF <= 0.05 again
 vcftools --gzvcf raw_data/genotype/ind1A_ind1B_MS_0.05_MAF_0.025_imputed.vcf.gz --recode --stdout --maf 0.025 --out raw_data/genotype/ind1A_ind1B_MAF_0.025 |bgzip -c > raw_data/genotype/ind1A_ind1B_MAF_0.025.vcf.gz
 
 
-### biallelicに直し、indelsを除く
+### extract bi-allelic data and remove in-dels
 vcftools --gzvcf raw_data/genotype/ind1A_ind1B_MAF_0.025.vcf.gz --recode --remove-indels  --min-alleles 2 --max-alleles 2 --stdout --out raw_data/genotype/ind1A_ind1B_MAF_0.025_SNP |bgzip -c > raw_data/genotype/ind1A_ind1B_MAF_0.025_SNP.vcf.gz
 
 
-### GTの抽出
-## GT dataの抽出
+### extract GT
+## extract GT data
 vcftools --gzvcf raw_data/genotype/ind1A_ind1B_MAF_0.025_SNP.vcf.gz --extract-FORMAT-info GT --out raw_data/genotype/ind1A_ind1B_MAF_0.025
 
 
