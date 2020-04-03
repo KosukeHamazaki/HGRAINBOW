@@ -1,5 +1,5 @@
 # HGRAINBOW
-#### Supplementary data and scripts used in the article ["Haplotype-based genome wide association study using a novel SNP-set method : RAINBOW"](https://www.biorxiv.org/content/10.1101/612028v1)
+#### Supplementary data and scripts used in the article [Kosuke Hamazaki and Hiroyoshi Iwata, “RAINBOW: Haplotype-based genome-wide association study using a novel SNP-set method”, PLOS Computational Biology, 16(2): e1007663, 2020.](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1007663)
 #### Author : Kosuke Hamazaki (hamazaki@ut-biomet.org)
 #### Date : 2019/03/28
 Here, I explain the structure of this repository.
